@@ -2,7 +2,8 @@
 
 [![License](https://poser.pugx.org/stepanenko3/nova-filemanager/license)](https://packagist.org/packages/stepanenko3/nova-filemanager)
 
-A quick fix/update to make it all work ... more or less. All credits to [Artem Stepanenko](https://github.com/stepanenko3) for his awesome work. 
+A quick fix/update to make it all work ... more or less. All credits to: [InfinetyES](https://github.com/InfinetyES/Nova-Filemanager) for this awesome work.
+[Artem Stepanenko](https://github.com/stepanenko3) for his upgrade for Nova 4.0. 
 
 A Filemanager Tool and Field for Laravel Nova
 
@@ -32,9 +33,8 @@ If you discover any security related issues, please using the issue tracker.
 
 ## Credits
 
+- [InfinetyES](https://github.com/InfinetyES/Nova-Filemanager)
 - [Artem Stepanenko](https://github.com/stepanenko3)
-- [Eric Lagarda](https://github.com/Krato)
-- [Spatie Nova Tool Skeleton](https://github.com/spatie/skeleton-nova-tool)
 
 ## Contributing
 
