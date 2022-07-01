@@ -47,8 +47,8 @@
                 @removeFile="removeFileFromUpload"
             ></UploadProgress>
 
-            <div v-if="currentField.image" class="mb-2">
-                <img :src="currentField.image" alt="" :style="{
+            <div v-if="value" class="mb-2">
+                <img :src="`${currentField.storage_root}/${value}`" alt="" :style="{
                     'max-width': currentField.maxWidth || 'auto'
                 }">
             </div>
