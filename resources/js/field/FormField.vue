@@ -39,15 +39,15 @@
                 @refresh="refreshCurrent"
             />
 
-            <!-- <UploadProgress
+            <UploadProgress
                 ref="uploader"
                 :current="currentPath"
                 :visibility="currentField.visibility"
                 :rules="currentField.upload_rules"
                 @removeFile="removeFileFromUpload"
-            ></UploadProgress> -->
+            ></UploadProgress>
 
-            <div v-if="currentField.image && value" class="mb-2">
+            <div v-if="currentField.image" class="mb-2">
                 <img :src="currentField.image" alt="" :style="{
                     'max-width': currentField.maxWidth || 'auto'
                 }">
@@ -182,7 +182,8 @@
             removeFileFromUpload(uploadedFileId) {
                 let index = this.filesToUpload.map((item) => item.id).indexOf(uploadedFileId);
 
-                this.$delete(this.filesToUpload, index);
+                this.filesToUpload.splice(index, 1)
+                //this.$delete(this.filesToUpload, index);
                 if (this.filesToUpload.length === 0) {
                     if (this.uploadType == 'folders') {
                         this.callFolderEvent(this.folderUploadedName);

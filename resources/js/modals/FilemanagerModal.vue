@@ -36,6 +36,7 @@
                 @uploadFiles="uploadFiles"
                 @rename="openRenameModal"
                 @delete="openDeleteModal"
+                @createFolder="showModalCreateFolder"
             />
         </div>
     </Modal>

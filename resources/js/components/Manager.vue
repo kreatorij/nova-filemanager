@@ -18,14 +18,14 @@
 
             <label
                 v-if="buttons.upload_button"
-                class="mr-2"
+                class="mr-2 manual_upload"
             >
-                <DefaultButton>
+                <DefaultButton @click="$refs.uploadInput.click()">
                     {{ __('Upload') }}
                 </DefaultButton>
                 <input
+                    ref="uploadInput"
                     type="file"
-                    class="hidden"
                     multiple="true"
                     @change="uploadFilesByButton"
                 />
@@ -150,9 +150,9 @@
 
         <div
             v-if="uploadingFiles"
-            class="overflow-y-auto p-4"
+            class="overflow-y-auto p-4 drop-files"
         >
-            <div class="h-40 flex flex-wrap items-center rounded-lg border-2 border-gray-200 dark:border-gray-700 border-dashed">
+            <div class="h-40 flex flex-wrap items-center rounded-lg border-2 border-gray-200 dark:border-gray-700 border-dashed drop-files">
                 <Heading level="1" class="w-full text-center py-4">
                     {{ __('Drop your files here!') }}
                 </Heading>
@@ -433,6 +433,7 @@
             filterBy: '',
             filteredExtensions: [],
             showFilters: false,
+            showUpload: false,
         }),
 
         directives: {
@@ -847,5 +848,9 @@
 
     .border-dashed {
         border-style: dashed;
+    }
+
+    .manual_upload > input[type='file'] {
+        display: none;
     }
 </style>

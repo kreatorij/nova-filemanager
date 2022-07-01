@@ -67,6 +67,6 @@
 
         data: () => ({
             mimeIcons: MimeIconsEnum,
-        })
+        }),
     };
 </script>

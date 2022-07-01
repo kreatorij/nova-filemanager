@@ -470,5 +470,4 @@ class FilemanagerField extends Field implements Cover
 
         return $data;
     }
-
 }
