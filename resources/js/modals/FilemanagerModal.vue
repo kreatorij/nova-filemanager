@@ -1,5 +1,5 @@
 <template>
-    <Modal :show="active" maxWidth="" style="max-width: 1200px">
+    <Modal :show="active" maxWidth="2xl">
         <div
             class="mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
         >
