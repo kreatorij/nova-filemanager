@@ -289,7 +289,7 @@
     }
 </style>
 <style>
-.filemanager-modal > div {
+.filemanager-modal {
 	max-width: 1200px !important;
 }
 </style>
