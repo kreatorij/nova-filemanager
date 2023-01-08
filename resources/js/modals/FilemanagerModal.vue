@@ -129,6 +129,7 @@
             filters: [],
             filterBy: '',
             showFilters: false,
+			currentPathFolder: null
         }),
 
         computed: {
@@ -147,7 +148,7 @@
             getData(folder) {
                 this.files = [];
                 this.parent = {};
-                this.path = [];
+                // this.path = [];
                 this.loadingfiles = true;
 
                 api.getDataField(this.resource, this.name, folder, this.filter)
@@ -290,6 +291,6 @@
 </style>
 <style>
 .filemanager-modal {
-	max-width: 1200px !important;
+	max-width: 1600px !important;
 }
 </style>

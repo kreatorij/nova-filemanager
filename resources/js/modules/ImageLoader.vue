@@ -168,7 +168,7 @@
                         height="20"
                         class="cursor-pointer hover:opacity-50 mr-2"
                         v-if="renamePermission"
-                        @click.prevent="editFolder($event)"
+                        @click.prevent="renameFile($event)"
                     />
 
                     <Icon
@@ -177,7 +177,7 @@
                         height="20"
                         class="cursor-pointer hover:opacity-50 text-red-500"
                         v-if="deletePermission"
-                        @click.prevent="deleteFolder($event)"
+                        @click.prevent="deleteFile($event)"
                     />
                 </div>
             </td>

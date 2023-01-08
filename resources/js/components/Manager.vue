@@ -104,7 +104,7 @@
             <input
                 class="form-control form-input form-input-bordered py-3 ml-auto"
                 type="search"
-                v-model="search"
+                :value="search"
                 :placeholder="this.__('Search')"
                 @input="searchItems"
             />
@@ -134,7 +134,7 @@
                                 <span
                                     href="#"
                                     class="cursor-pointer font-bold"
-                                    @click="goToFolder(folder.path)"
+                                    @click="goToFolder(folder.path + folder.name)"
                                 >
                                     {{ folder.name }}
                                 </span>

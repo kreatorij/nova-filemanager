@@ -4,10 +4,10 @@
             type="text"
             class="w-full form-control form-input form-input-bordered"
             :placeholder="__('Select a file')"
-            v-model="value"
+            :value="value"
+            @input="$emit('update:value', $event.target.value)"
             :disabled="isReadonly"
         />
-
         <DefaultButton class="ml-4 whitespace-nowrap nowrap" @click.prevent="openModalFilemanager">
             {{ __('Open FileManager') }}
         </DefaultButton>

@@ -6,299 +6,291 @@ use Carbon\Carbon;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use RarArchive;
-use SplFileInfo;
-use ZipArchive;
 
 class NormalizeFile
 {
-    use FileFunctions;
+	use FileFunctions;
 
-    /**
-     * @var mixed
-     */
-    protected $storage;
+	/**
+	 * @var mixed
+	 */
+	protected $storage;
 
-    /**
-     * @var mixed
-     */
-    protected $file;
+	/**
+	 * @var mixed
+	 */
+	protected $file;
 
-    /**
-     * @var mixed
-     */
-    protected $storagePath;
+	/**
+	 * @var mixed
+	 */
+	protected $storagePath;
 
-    /**
-     * @param string $path
-     */
-    public function __construct(FilesystemAdapter $storage, string $path, string $storagePath)
-    {
-        $this->storage = $storage;
-        $this->file = new SplFileInfo($path);
+	public function __construct(FilesystemAdapter $storage, string $path, string $storagePath)
+	{
+		$this->storage = $storage;
+		$this->file = new \SplFileInfo($path);
 
-        $this->storagePath = $storagePath;
-    }
+		$this->storagePath = $storagePath;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function toArray()
-    {
-        $data = collect([
-            'name' => $this->file->getFilename(),
-            'mime' => $this->getCorrectMimeFileType(),
-            'path' => $this->storagePath,
-            'size' => $this->getFileSize(),
-            'url'  => $this->cleanSlashes($this->storage->url($this->storagePath)),
-            'date' => $this->modificationDate(),
-            'ext'  => $this->file->getExtension(),
-        ]);
+	/**
+	 * @return mixed
+	 */
+	public function toArray()
+	{
+		$data = collect([
+			'name' => $this->file->getFilename(),
+			'mime' => $this->getCorrectMimeFileType(),
+			'path' => $this->storagePath,
+			'size' => $this->getFileSize(),
+			'url' => $this->cleanSlashes($this->storage->url($this->storagePath)),
+			'date' => $this->modificationDate(),
+			'ext' => $this->file->getExtension(),
+		]);
 
-        $data = $this->setExtras($data);
+		$data = $this->setExtras($data);
 
-        return $data->toArray();
-    }
+		return $data->toArray();
+	}
 
-    /**
-     * @param Collection $data
-     * @return mixed
-     */
-    private function setExtras(Collection $data)
-    {
-        $mime = $this->storage->mimeType($this->storagePath);
+	public function getFileSize()
+	{
+		try {
+			return (0 != $this->file->getSize()) ? $this->formatBytes($this->file->getSize(), 0) : 0;
+		} catch (\Exception $e) {
+			return false;
+		}
+	}
 
-        // Image
-        if (Str::contains($mime, 'image') || $data['ext'] == 'svg') {
-            $data->put('type', 'image');
-            $data->put('dimensions', $this->getDimensions($this->storage->mimeType($this->storagePath)));
-        }
+	/**
+	 * @param $timestamp
+	 */
+	public function modificationDate()
+	{
+		try {
+			return Carbon::createFromTimestamp($this->file->getMTime())->format('Y-m-d H:i:s');
+		} catch (\Exception $e) {
+			return false;
+		}
+	}
 
-        // Video
-        if (Str::contains($mime, 'audio')) {
-            $data->put('type', 'audio');
-            $src = str_replace(env('APP_URL'), '', $this->storage->url($this->storagePath));
-            $data->put('src', $src);
-        }
+	/**
+	 * @return mixed
+	 */
+	private function setExtras(Collection $data)
+	{
+		$mime = $this->storage->mimeType($this->storagePath);
 
-        // Video
-        if (Str::contains($mime, 'video')) {
-            $data->put('type', 'video');
-        }
+		// Image
+		if (Str::contains($mime, 'image') || 'svg' == $data['ext']) {
+			$data->put('type', 'image');
+			$data->put('dimensions', $this->getDimensions($this->storage->mimeType($this->storagePath)));
+		}
 
-        // text
-        if ($this->availablesTextExtensions() && Str::contains($mime, 'text')) {
-            $data->put('type', 'text');
+		// Video
+		if (Str::contains($mime, 'audio')) {
+			$data->put('type', 'audio');
+			$src = str_replace(env('APP_URL'), '', $this->storage->url($this->storagePath));
+			$data->put('src', $src);
+		}
 
-            if ($data['size']) {
-                $size = $this->file->getSize();
-                if ($size < 350000) {
-                    $data->put('source', $this->storage->get($this->storagePath));
-                } else {
-                    $data->put('source', __('Only files below 350 Kb will be shown'));
-                }
-            }
-        }
+		// Video
+		if (Str::contains($mime, 'video')) {
+			$data->put('type', 'video');
+		}
 
-        // text
-        if (Str::contains($mime, 'pdf')) {
-            $data->put('type', 'pdf');
-        }
+		// text
+		if ($this->availablesTextExtensions() && Str::contains($mime, 'text')) {
+			$data->put('type', 'text');
 
-        // docx
-        if (Str::contains($mime, 'wordprocessingml')) {
-            $data->put('type', 'word');
-            // $data->put('source', $this->storage->get($this->storagePath));
-        }
+			if ($data['size']) {
+				$size = $this->file->getSize();
+				if ($size < 350000) {
+					$data->put('source', $this->storage->get($this->storagePath));
+				} else {
+					$data->put('source', __('Only files below 350 Kb will be shown'));
+				}
+			}
+		}
 
-        // zip
-        if (Str::contains($mime, 'zip')) {
-            $data->put('type', 'zip');
-            $data->put('source', $this->readZip());
-        }
+		// text
+		if (Str::contains($mime, 'pdf')) {
+			$data->put('type', 'pdf');
+		}
 
-        // // rar
-        // if (Str::contains($mime, 'rar')) {
-        //     $data->put('type', 'zip');
-        //     $data->put('source', $this->readRar());
-        // }
+		// docx
+		if (Str::contains($mime, 'wordprocessingml')) {
+			$data->put('type', 'word');
+			// $data->put('source', $this->storage->get($this->storagePath));
+		}
 
-        $data->put('image', $this->getImage($mime, $data['ext']));
+		// zip
+		if (Str::contains($mime, 'zip')) {
+			$data->put('type', 'zip');
+			$data->put('source', $this->readZip());
+		}
 
-        return $data;
-    }
+		// // rar
+		// if (Str::contains($mime, 'rar')) {
+		//     $data->put('type', 'zip');
+		//     $data->put('source', $this->readRar());
+		// }
 
-    public function getFileSize()
-    {
-        try {
-            return ($this->file->getSize() != 0) ? $this->formatBytes($this->file->getSize(), 0) : 0;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
+		$data->put('image', $this->getImage($mime, $data['ext']));
 
-    /**
-     * Returns the image or the svg icon preview.
-     *
-     * @return mixed
-     */
-    private function getImage($mime, $extension = false)
-    {
-        if (Str::contains($mime, 'image') || $extension == 'svg') {
-            return $this->storage->url($this->storagePath);
-        }
-    }
+		return $data;
+	}
 
-    /**
-     * @param $mime
-     */
-    private function getDimensions($mime)
-    {
-        if (env('FILEMANAGER_DISK') != 'public') {
-            return false;
-        }
+	/**
+	 * Returns the image or the svg icon preview.
+	 *
+	 * @param mixed $mime
+	 * @param mixed $extension
+	 *
+	 * @return mixed
+	 */
+	private function getImage($mime, $extension = false)
+	{
+		if (Str::contains($mime, 'image') || 'svg' == $extension) {
+			return $this->storage->url($this->storagePath);
+		}
+	}
 
-        if (Str::contains($mime, 'image')) {
-            [$width, $height] = getimagesize($this->storage->path($this->storagePath));
+	private function getDimensions($mime)
+	{
+		if ('public' != env('FILEMANAGER_DISK')) {
+			return false;
+		}
 
-            if (!empty($width) && !empty($height)) {
-                return $width . 'x' . $height;
-            }
-        }
+		if (Str::contains($mime, 'image')) {
+			[$width, $height] = getimagesize($this->storage->path($this->storagePath));
 
-        return false;
-    }
+			if (!empty($width) && !empty($height)) {
+				return $width.'x'.$height;
+			}
+		}
 
-    /**
-     * @param $timestamp
-     */
-    public function modificationDate()
-    {
-        try {
-            return Carbon::createFromTimestamp($this->file->getMTime())->format('Y-m-d H:i:s');
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
+		return false;
+	}
 
-    /**
-     * @return mixed
-     */
-    private function getCorrectMimeFileType()
-    {
-        $extension = $this->file->getExtension();
-        $types = MimeTypes::checkMimeType($extension);
+	/**
+	 * @return mixed
+	 */
+	private function getCorrectMimeFileType()
+	{
+		$extension = $this->file->getExtension();
+		$types = MimeTypes::checkMimeType($extension);
 
-        if (count($types) > 0) {
-            return reset($types);
-        }
+		if (count($types) > 0) {
+			return reset($types);
+		}
 
-        //If no type
+		// If no type
 
-        return $this->storage->mimeType($this->storagePath);
-    }
+		return $this->storage->mimeType($this->storagePath);
+	}
 
-    private function availablesTextExtensions()
-    {
-        $extension = $this->file->getExtension();
-        $types = MimeTypes::checkMimeType($extension);
+	private function availablesTextExtensions()
+	{
+		$extension = $this->file->getExtension();
+		$types = MimeTypes::checkMimeType($extension);
 
-        $exist = false;
-        for ($i = 0; $i < count($types); $i++) {
-            if (Str::contains($types[$i], 'text') || Str::contains($types[$i], 'plain') || Str::contains($types[$i], 'sql') || Str::contains($types[$i], 'javascript')) {
-                $exist = true;
-                break;
-            }
-        }
+		$exist = false;
+		for ($i = 0; $i < count($types); ++$i) {
+			if (Str::contains($types[$i], 'text') || Str::contains($types[$i], 'plain') || Str::contains($types[$i], 'sql') || Str::contains($types[$i], 'javascript')) {
+				$exist = true;
 
-        if ($exist) {
-            return true;
-        }
+				break;
+			}
+		}
 
-        return false;
-    }
+		if ($exist) {
+			return true;
+		}
 
-    /**
-     * Read zip files.
-     *
-     * @return mixed
-     */
-    private function readZip()
-    {
-        $zip = new ZipArchive();
-        $zip->open($this->storage->path($this->storagePath));
-        $contents = [];
+		return false;
+	}
 
-        for ($i = 0; $i < $zip->numFiles; $i++) {
-            $stat = $zip->statIndex($i);
-            $contents[$stat['name']] = [
-                'name' => $stat['name'],
-                'size' => $stat['size'],
-            ];
-            // $contents[$stat['name']] = $stat['name'];
-        }
+	/**
+	 * Read zip files.
+	 *
+	 * @return mixed
+	 */
+	private function readZip()
+	{
+		$zip = new \ZipArchive();
+		$zip->open($this->storage->path($this->storagePath));
+		$contents = [];
 
-        return $this->buildTree($contents);
-    }
+		for ($i = 0; $i < $zip->numFiles; ++$i) {
+			$stat = $zip->statIndex($i);
+			$contents[$stat['name']] = [
+				'name' => $stat['name'],
+				'size' => $stat['size'],
+			];
+			// $contents[$stat['name']] = $stat['name'];
+		}
 
-    /**
-     * Read rar files.
-     *
-     * @return mixed
-     */
-    private function readRar()
-    {
-        $zip = new RarArchive();
-        $zip->open($this->storage->path($this->storagePath));
-        $contents = [];
+		return $this->buildTree($contents);
+	}
 
-        for ($i = 0; $i < $zip->numFiles; $i++) {
-            $stat = $zip->statIndex($i);
-            $contents[$stat['name']] = [
-                'name' => $stat['name'],
-                'size' => $stat['size'],
-            ];
-            // $contents[$stat['name']] = $stat['name'];
-        }
+	/**
+	 * Read rar files.
+	 *
+	 * @return mixed
+	 */
+	private function readRar()
+	{
+		$zip = new \RarArchive();
+		$zip->open($this->storage->path($this->storagePath));
+		$contents = [];
 
-        return $this->buildTree($contents);
-    }
+		for ($i = 0; $i < $zip->numFiles; ++$i) {
+			$stat = $zip->statIndex($i);
+			$contents[$stat['name']] = [
+				'name' => $stat['name'],
+				'size' => $stat['size'],
+			];
+			// $contents[$stat['name']] = $stat['name'];
+		}
 
-    /**
-     * @param $pathList
-     * @return mixed
-     */
-    private function buildTree($pathList)
-    {
-        $data = [];
-        foreach ($pathList as $path => $info) {
-            $list = explode('/', trim($path, '/'));
-            $last_dir = &$data;
-            foreach ($list as $dir) {
-                $last_dir = &$last_dir[$dir];
-            }
-            // $last_dir['info'] = $info;
-        }
-        $keys = $this->arrayKeysRecursive($data);
-        array_reverse($keys);
+		return $this->buildTree($contents);
+	}
 
-        return json_encode($keys);
-    }
+	/**
+	 * @return mixed
+	 */
+	private function buildTree($pathList)
+	{
+		$data = [];
+		foreach ($pathList as $path => $info) {
+			$list = explode('/', trim($path, '/'));
+			$last_dir = &$data;
+			foreach ($list as $dir) {
+				$last_dir = &$last_dir[$dir];
+			}
+			// $last_dir['info'] = $info;
+		}
+		$keys = $this->arrayKeysRecursive($data);
+		array_reverse($keys);
 
-    /**
-     * @param array $array
-     * @return mixed
-     */
-    private function arrayKeysRecursive(array $array): array
-    {
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $index[$key] = $this->arrayKeysRecursive($value);
-            } else {
-                $index[] = $key;
-            }
-        }
+		return json_encode($keys);
+	}
 
-        return $index ?? [];
-    }
+	/**
+	 * @return mixed
+	 */
+	private function arrayKeysRecursive(array $array): array
+	{
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				$index[$key] = $this->arrayKeysRecursive($value);
+			} else {
+				$index[] = $key;
+			}
+		}
+
+		return $index ?? [];
+	}
 }
