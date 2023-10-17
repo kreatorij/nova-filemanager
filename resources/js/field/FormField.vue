@@ -63,7 +63,7 @@
                 @open-modal="openFilemanagerModal"
             ></FileSelect>
 
-            <DangerButton v-if="value" @click.prevent="openRemoveModal">
+            <DangerButton v-if="value" @click.prevent="openRemoveModal" type="button">
                 <Icon type="trash" width="16" height="16" />
                 <span class="ml-2">
                     {{ __('Delete') }}

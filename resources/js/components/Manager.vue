@@ -8,6 +8,7 @@
             <OutlineButton
                 @click="$emit('refresh')"
                 class="mr-2"
+                type="button"
                 :class="{ rotate: loading }"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -43,6 +44,7 @@
             <OutlineButton
                 v-if="view == 'list'"
                 @click="viewAs('grid')"
+                type="button"
                 class="mr-2"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -53,6 +55,7 @@
 
             <OutlineButton
                 v-if="view == 'grid'"
+                type="button"
                 @click="viewAs('list')"
                 class="mr-2"
             >
@@ -64,6 +67,7 @@
 
             <OutlineButton
                 v-if="buttons.select_multiple"
+                type="button"
                 @click="multiSelecting = !multiSelecting"
                 class="mr-2"
             >
@@ -81,6 +85,7 @@
             </OutlineButton>
 
             <DangerButton
+	            type="button"
                 v-if="multiSelecting && selectedFiles.length > 0"
                 @click="$emit('multiDelete')"
                 class="mr-2"
@@ -185,6 +190,7 @@
                 </Heading>
 
                 <DangerButton
+	                type="button"
                     v-if="buttons.delete_folder && !filter"
                     @click="removeDirectory"
                 >

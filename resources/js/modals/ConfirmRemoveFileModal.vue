@@ -27,6 +27,7 @@
                     />
 
                     <DangerButton
+	                    type="button"
                         ref="confirmButton"
                         @click.prevent="handleConfirm"
                     >

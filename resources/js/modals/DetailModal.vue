@@ -12,7 +12,7 @@
                     </span>
                 </div>
 
-                <OutlineButton @click="closePreview">
+                <OutlineButton @click="closePreview" type="button">
                    <Icon type="x" width="16" height="16" />
                 </OutlineButton>
             </ModalHeader>
@@ -149,6 +149,7 @@
                             v-if="buttons.delete_file"
                             :messages="[__('Delete'), __('Are you sure?'), __('Deleting...')]"
                             @success="removeFile"
+                            type="button"
                         >
                             <template v-slot:start>
                                 <Icon type="trash" class="mr-1" width="18" height="18" />
@@ -162,6 +163,7 @@
                             class="md:col-span-4"
                             v-if="buttons.duplicate_file || true"
                             :messages="[__('Duplicate'), __('Are you sure?'), __('Duplicating...')]"
+                            type="button"
                             @success="duplicate"
                         >
                             <template v-slot:start>

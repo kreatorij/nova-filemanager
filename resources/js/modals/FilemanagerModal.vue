@@ -8,7 +8,7 @@
                     {{ __('FileManager') }}
                 </div>
 
-                <OutlineButton @click="closeModal">
+                <OutlineButton @click="closeModal" type="button">
                     <Icon type="x" width="16" height="16" />
                 </OutlineButton>
             </ModalHeader>
