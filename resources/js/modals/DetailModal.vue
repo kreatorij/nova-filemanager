@@ -116,7 +116,7 @@
                     </div>
 
                     <div class="grid md:grid-cols-12 gap-4">
-                        <DefaultButton class="md:col-span-4" v-if="popup" @click="selectFile">
+                        <DefaultButton type="button" class="md:col-span-4" v-if="popup" @click="selectFile">
                             <Icon
                                 type="check-circle"
                                 class="mr-1"
@@ -132,7 +132,7 @@
                             v-if="buttons.download_file"
                             :href="`/nova-vendor/kreatorij/nova-filemanager/actions/download-file?file=${this.info.path}`"
                         >
-                            <DefaultButton class="flex-grow">
+                            <DefaultButton type="button" class="flex-grow">
                                 <Icon
                                     type="download"
                                     class="mr-1"

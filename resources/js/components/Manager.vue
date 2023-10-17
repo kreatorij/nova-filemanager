@@ -20,7 +20,7 @@
                 v-if="buttons.upload_button"
                 class="mr-2 manual_upload"
             >
-                <DefaultButton @click="$refs.uploadInput.click()">
+                <DefaultButton type="button" @click="$refs.uploadInput.click()">
                     {{ __('Upload') }}
                 </DefaultButton>
                 <input
@@ -35,6 +35,7 @@
                 v-if="buttons.create_folder"
                 @click="$emit('createFolder')"
                 class="mr-2"
+                type="button"
             >
                 {{ __('Create folder') }}
             </DefaultButton>

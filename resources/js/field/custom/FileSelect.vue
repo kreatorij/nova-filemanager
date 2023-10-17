@@ -8,7 +8,7 @@
             @input="$emit('update:value', $event.target.value)"
             :disabled="isReadonly"
         />
-        <DefaultButton class="ml-4 whitespace-nowrap nowrap" @click.prevent="openModalFilemanager">
+        <DefaultButton type="button" class="ml-4 whitespace-nowrap nowrap" @click.prevent="openModalFilemanager">
             {{ __('Open FileManager') }}
         </DefaultButton>
     </div>
